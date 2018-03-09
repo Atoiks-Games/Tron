@@ -1,6 +1,7 @@
 package org.atoiks.games.tron;
 
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.event.KeyEvent;
 
 import java.util.BitSet;
@@ -34,10 +35,18 @@ public final class Map extends Scene {
 
     private float counter, elapsedTime;
 
+    private Image img;
+    private boolean paused;
+
     @Override
     public void render(final IGraphics g) {
         g.setClearColor(Color.black);
         g.clearGraphics();
+
+        if (paused) {
+            if (img != null) g.drawImage(img, 0, 0);
+            return;
+        }
 
         // P1
         final int p1RealX = p1x * TILE_SIZE;
@@ -63,32 +72,41 @@ public final class Map extends Scene {
 
     @Override
     public boolean update(final float dt) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_ESCAPE)) {
+            paused = true;
+        }
+
+        if (paused) {
+            if (scene.keyboard().isKeyPressed(KeyEvent.VK_ENTER)) paused = false;
+            else return true;
+        }
+
         elapsedTime += dt;
 
         // Key handling
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_W)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_W) && p1d != Direction.DOWN) {
             p1d = Direction.UP;
         }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_S)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_S) && p1d != Direction.UP) {
             p1d = Direction.DOWN;
         }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_A)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_A) && p1d != Direction.RIGHT) {
             p1d = Direction.LEFT;
         }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_D)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_D) && p1d != Direction.LEFT) {
             p1d = Direction.RIGHT;
         }
 
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_I)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_I) && p2d != Direction.DOWN) {
             p2d = Direction.UP;
         }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_K)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_K) && p2d != Direction.UP) {
             p2d = Direction.DOWN;
         }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_J)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_J) && p2d != Direction.RIGHT) {
             p2d = Direction.LEFT;
         }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_L)) {
+        if (scene.keyboard().isKeyDown(KeyEvent.VK_L) && p2d != Direction.LEFT) {
             p2d = Direction.RIGHT;
         }
 
@@ -145,6 +163,9 @@ public final class Map extends Scene {
 
         counter = 0;
         elapsedTime = 0;
+
+        img = (Image) scene.resources().get("/pause.bmp");
+        paused = false;
     }
 
     @Override

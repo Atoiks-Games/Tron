@@ -55,6 +55,7 @@ public final class Loading extends Scene {
             loaded = LoadState.LOADING;
             loader.submit(() -> {
                 loadResourceAsImage("/title.bmp");
+                loadResourceAsImage("/pause.bmp");
                 loadResourceAsImage("/tie.bmp");
                 loadResourceAsImage("/p1_win.bmp");
                 loadResourceAsImage("/p2_win.bmp");
