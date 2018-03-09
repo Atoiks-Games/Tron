@@ -24,17 +24,15 @@ public final class Map extends Scene {
 
     public static final int SPEED = 1;
 
-    private int p1x = 10;
-    private int p1y = MAX_Y / 2;
-    private Direction p1d = Direction.UP;
-
-    private int p2x = MAX_X - 10;
-    private int p2y = MAX_Y / 2;
-    private Direction p2d = Direction.UP;
-
     private final BitSet markedTiles = new BitSet(MATRIX_SIZE);
 
-    private float elapsedTime = 0;
+    private int p1x, p1y;
+    private Direction p1d;
+
+    private int p2x, p2y;
+    private Direction p2d;
+
+    private float counter, elapsedTime;
 
     @Override
     public void render(final IGraphics g) {
@@ -45,15 +43,13 @@ public final class Map extends Scene {
         final int p1RealX = p1x * TILE_SIZE;
         final int p1RealY = p1y * TILE_SIZE;
         g.setColor(Color.red);
-        g.fillRect(p1RealX, p1RealY,
-                   p1RealX + TILE_SIZE, p1RealY + TILE_SIZE);
+        g.fillRect(p1RealX, p1RealY, p1RealX + TILE_SIZE, p1RealY + TILE_SIZE);
 
         // P2
         final int p2RealX = p2x * TILE_SIZE;
         final int p2RealY = p2y * TILE_SIZE;
         g.setColor(Color.cyan);
-        g.fillRect(p2RealX, p2RealY,
-                   p2RealX + TILE_SIZE, p2RealY + TILE_SIZE);
+        g.fillRect(p2RealX, p2RealY, p2RealX + TILE_SIZE, p2RealY + TILE_SIZE);
 
         // Marked tiles
         g.setColor(Color.green);
@@ -61,13 +57,14 @@ public final class Map extends Scene {
             if ((i = markedTiles.nextSetBit(i)) < 0) break;
             final int x = i % MAX_X * TILE_SIZE;
             final int y = i / MAX_X * TILE_SIZE;
-            g.fillRect(x, y,
-                       x + TILE_SIZE, y + TILE_SIZE);
+            g.fillRect(x, y, x + TILE_SIZE, y + TILE_SIZE);
         }
     }
 
     @Override
     public boolean update(final float dt) {
+        elapsedTime += dt;
+
         // Key handling
         if (scene.keyboard().isKeyDown(KeyEvent.VK_W)) {
             p1d = Direction.UP;
@@ -95,17 +92,17 @@ public final class Map extends Scene {
             p2d = Direction.RIGHT;
         }
 
-        if ((elapsedTime += dt) < 0.2) return true;
-        elapsedTime = 0;
+        if ((counter += dt) < generateDelay()) return true;
+        counter = 0;
 
         // Collision Testing
-        if (markedTiles.get(locateOffset(p1x, p1y))) {
-            // P1 lost
-            return false;
-        }
-        if (markedTiles.get(locateOffset(p2x, p2y))) {
-            // P2 lost
-            return false;
+        final boolean p1Col = markedTiles.get(locateOffset(p1x, p1y));
+        final boolean p2Col = markedTiles.get(locateOffset(p2x, p2y));
+        if (p1Col || p2Col) {
+            scene.resources().put("state.p1", p1Col);
+            scene.resources().put("state.p2", p2Col);
+            scene.gotoNextScene();
+            return true;
         }
 
         // P1
@@ -136,11 +133,26 @@ public final class Map extends Scene {
 
     @Override
     public void enter(int from) {
+        p1x = 10;
+        p1y = MAX_Y / 2;
+        p1d = Direction.UP;
+
+        p2x = MAX_X - 10;
+        p2y = MAX_Y / 2;
+        p2d = Direction.UP;
+
+        markedTiles.clear();
+
+        counter = 0;
         elapsedTime = 0;
     }
 
     @Override
     public void leave() {
+    }
+
+    private double generateDelay() {
+        return Math.pow(1.1, -elapsedTime);
     }
 
     private static int locateOffset(final int x, final int y) {

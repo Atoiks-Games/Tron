@@ -7,7 +7,7 @@ import java.awt.event.KeyEvent;
 import org.atoiks.games.framework2d.Scene;
 import org.atoiks.games.framework2d.IGraphics;
 
-public final class Title extends Scene {
+public final class Ending extends Scene {
 
     private Image img;
 
@@ -21,19 +21,23 @@ public final class Title extends Scene {
     @Override
     public boolean update(final float dt) {
         if (scene.keyboard().isKeyPressed(KeyEvent.VK_ENTER)) {
-            scene.gotoNextScene();
+            scene.switchToScene(1);
         }
         return true;
     }
 
     @Override
     public void resize(int w, int h) {
-        // Screen size is fixed
+        // Screen is fixed
     }
 
     @Override
     public void enter(int from) {
-        img = (Image) scene.resources().get("/title.bmp");
+        final boolean p1Lost = (boolean) scene.resources().getOrDefault("state.p1", false);
+        final boolean p2Lost = (boolean) scene.resources().getOrDefault("state.p2", false);
+
+        img = (Image) scene.resources().get(p1Lost == p2Lost ? "/tie.bmp" :
+            (p2Lost ? "/p1_win.bmp" : "/p2_win.bmp"));
     }
 
     @Override
