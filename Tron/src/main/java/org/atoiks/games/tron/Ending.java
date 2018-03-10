@@ -10,12 +10,15 @@ import org.atoiks.games.framework2d.IGraphics;
 public final class Ending extends Scene {
 
     private Image img;
+    private String time;
 
     @Override
     public void render(final IGraphics g) {
         g.setClearColor(Color.black);
         g.clearGraphics();
         if (img != null) g.drawImage(img, 0, 0);
+        g.setColor(Color.white);
+        g.drawString("Game lasted for " + time, 20, 440);
     }
 
     @Override
@@ -33,6 +36,8 @@ public final class Ending extends Scene {
 
     @Override
     public void enter(int from) {
+        time = String.format("%.2fs", scene.resources().getOrDefault("state.time", 0.0f));
+
         final boolean p1Lost = (boolean) scene.resources().getOrDefault("state.p1", false);
         final boolean p2Lost = (boolean) scene.resources().getOrDefault("state.p2", false);
 

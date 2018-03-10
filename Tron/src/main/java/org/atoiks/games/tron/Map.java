@@ -119,6 +119,7 @@ public final class Map extends Scene {
         if (p1Col || p2Col) {
             scene.resources().put("state.p1", p1Col);
             scene.resources().put("state.p2", p2Col);
+            scene.resources().put("state.time", elapsedTime);
             scene.gotoNextScene();
             return true;
         }
