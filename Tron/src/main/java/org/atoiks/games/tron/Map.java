@@ -9,6 +9,8 @@ import java.util.BitSet;
 import org.atoiks.games.framework2d.Scene;
 import org.atoiks.games.framework2d.IGraphics;
 
+import org.atoiks.games.tron.ability.NullAbility;
+
 public final class Map extends Scene {
 
     public static final int TILE_SIZE = 10;
@@ -77,8 +79,8 @@ public final class Map extends Scene {
         final int p2x = p2.getX();
         final int p2y = p2.getY();
 
-        final boolean p1Col = markedTiles.get(locateOffset(p1x, p1y));
-        final boolean p2Col = markedTiles.get(locateOffset(p2x, p2y));
+        final boolean p1Col = markedTiles.get(locateOffset(p1x, p1y)) ? p1.onHit() : false;
+        final boolean p2Col = markedTiles.get(locateOffset(p2x, p2y)) ? p2.onHit() : false;
         if (p1Col || p2Col) {
             scene.resources().put("state.p1", p1Col);
             scene.resources().put("state.p2", p2Col);
@@ -115,6 +117,22 @@ public final class Map extends Scene {
 
         img = (Image) scene.resources().get("/pause.bmp");
         paused = false;
+
+        final int p1Opt = (int) scene.resources().getOrDefault("trait.p1", 0);
+        switch (p1Opt) {
+        default:
+        case 0: p1.ability = new NullAbility(); break;
+        case 1: p1.ability = p1.new DashAbility(); break;
+        case 2: p1.ability = p1.new ShieldAbility(); break;
+        }
+
+        final int p2Opt = (int) scene.resources().getOrDefault("trait.p2", 1);
+        switch (p2Opt) {
+        default:
+        case 0: p2.ability = new NullAbility(); break;
+        case 1: p2.ability = p2.new DashAbility(); break;
+        case 2: p2.ability = p2.new ShieldAbility(); break;
+        }
     }
 
     @Override

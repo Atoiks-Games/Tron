@@ -12,7 +12,7 @@ public class App {
                 .setTitle("Atoiks Games - Tron")
                 .setResizable(false)
                 .setSize(600, 480)
-                .setScenes(new Loading(), new Title(), new Map(), new Ending());
+                .setScenes(new Loading(), new Title(), new AbilityOpt(), new Map(), new Ending());
         try (final IFrame<?> frame = new Frame(info)) {
             frame.init();
             frame.loop();
