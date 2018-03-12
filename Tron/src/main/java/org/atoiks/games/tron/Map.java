@@ -11,27 +11,17 @@ import org.atoiks.games.framework2d.IGraphics;
 
 public final class Map extends Scene {
 
-    private enum Direction {
-        UP, DOWN, LEFT, RIGHT
-    }
-
     public static final int TILE_SIZE = 10;
-    public static final int TILE_HALF_SIZE = TILE_SIZE / 2;
 
     public static final int MAX_X = 600 / TILE_SIZE;
     public static final int MAX_Y = 480 / TILE_SIZE;
 
     public static final int MATRIX_SIZE = MAX_X * MAX_Y;
 
-    public static final int SPEED = 1;
-
     private final BitSet markedTiles = new BitSet(MATRIX_SIZE);
 
-    private int p1x, p1y;
-    private Direction p1d;
-
-    private int p2x, p2y;
-    private Direction p2d;
+    private Player p1 = new Player(TILE_SIZE, Color.red, new int[]{KeyEvent.VK_W, KeyEvent.VK_A, KeyEvent.VK_S, KeyEvent.VK_D, KeyEvent.VK_X});
+    private Player p2 = new Player(TILE_SIZE, Color.cyan, new int[]{KeyEvent.VK_I, KeyEvent.VK_J, KeyEvent.VK_K, KeyEvent.VK_L, KeyEvent.VK_COMMA});
 
     private float counter, elapsedTime;
 
@@ -48,17 +38,8 @@ public final class Map extends Scene {
             return;
         }
 
-        // P1
-        final int p1RealX = p1x * TILE_SIZE;
-        final int p1RealY = p1y * TILE_SIZE;
-        g.setColor(Color.red);
-        g.fillRect(p1RealX, p1RealY, p1RealX + TILE_SIZE, p1RealY + TILE_SIZE);
-
-        // P2
-        final int p2RealX = p2x * TILE_SIZE;
-        final int p2RealY = p2y * TILE_SIZE;
-        g.setColor(Color.cyan);
-        g.fillRect(p2RealX, p2RealY, p2RealX + TILE_SIZE, p2RealY + TILE_SIZE);
+        p1.render(g);
+        p2.render(g);
 
         // Marked tiles
         g.setColor(Color.green);
@@ -84,36 +65,18 @@ public final class Map extends Scene {
         elapsedTime += dt;
 
         // Key handling
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_W) && p1d != Direction.DOWN) {
-            p1d = Direction.UP;
-        }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_S) && p1d != Direction.UP) {
-            p1d = Direction.DOWN;
-        }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_A) && p1d != Direction.RIGHT) {
-            p1d = Direction.LEFT;
-        }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_D) && p1d != Direction.LEFT) {
-            p1d = Direction.RIGHT;
-        }
-
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_I) && p2d != Direction.DOWN) {
-            p2d = Direction.UP;
-        }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_K) && p2d != Direction.UP) {
-            p2d = Direction.DOWN;
-        }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_J) && p2d != Direction.RIGHT) {
-            p2d = Direction.LEFT;
-        }
-        if (scene.keyboard().isKeyDown(KeyEvent.VK_L) && p2d != Direction.LEFT) {
-            p2d = Direction.RIGHT;
-        }
+        p1.handleInput(dt, scene.keyboard());
+        p2.handleInput(dt, scene.keyboard());
 
         if ((counter += dt) < generateDelay()) return true;
         counter = 0;
 
         // Collision Testing
+        final int p1x = p1.getX();
+        final int p1y = p1.getY();
+        final int p2x = p2.getX();
+        final int p2y = p2.getY();
+
         final boolean p1Col = markedTiles.get(locateOffset(p1x, p1y));
         final boolean p2Col = markedTiles.get(locateOffset(p2x, p2y));
         if (p1Col || p2Col) {
@@ -124,23 +87,13 @@ public final class Map extends Scene {
             return true;
         }
 
-        // P1
+        // Mark tiles as occupied
         markedTiles.set(locateOffset(p1x, p1y));
-        switch (p1d) {
-        case UP:    if ((p1y -= SPEED) < 0) p1y = MAX_Y - 1; break;
-        case DOWN:  if ((p1y += SPEED) > MAX_Y - 1) p1y = 0; break;
-        case LEFT:  if ((p1x -= SPEED) < 0) p1x = MAX_X - 1; break;
-        case RIGHT: if ((p1x += SPEED) > MAX_X - 1) p1x = 0; break;
-        }
-
-        // P2
         markedTiles.set(locateOffset(p2x, p2y));
-        switch (p2d) {
-        case UP:    if ((p2y -= SPEED) < 0) p2y = MAX_Y - 1; break;
-        case DOWN:  if ((p2y += SPEED) > MAX_Y - 1) p2y = 0; break;
-        case LEFT:  if ((p2x -= SPEED) < 0) p2x = MAX_X - 1; break;
-        case RIGHT: if ((p2x += SPEED) > MAX_X - 1) p2x = 0; break;
-        }
+
+        // Update location
+        p1.update(dt, MAX_X, MAX_Y);
+        p2.update(dt, MAX_X, MAX_Y);
 
         return true;
     }
@@ -152,13 +105,8 @@ public final class Map extends Scene {
 
     @Override
     public void enter(int from) {
-        p1x = 10;
-        p1y = MAX_Y / 2;
-        p1d = Direction.UP;
-
-        p2x = MAX_X - 10;
-        p2y = MAX_Y / 2;
-        p2d = Direction.UP;
+        p1.reset(10, MAX_Y / 2, Direction.UP);
+        p2.reset(MAX_X - 10, MAX_Y / 2, Direction.UP);
 
         markedTiles.clear();
 
