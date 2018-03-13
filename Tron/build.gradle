@@ -14,3 +14,21 @@ dependencies {
     compile project(':Framework2D')
 }
 
+task copyLicense {
+    outputs.file new File("$buildDir/COPYING")
+    outputs.file new File("$buildDir/README.md")
+    doLast {
+        copy {
+            from "COPYING"
+            into "$buildDir"
+        }
+        copy {
+            from "README.md"
+            into "$buildDir"
+        }
+    }
+}
+
+applicationDistribution.from(copyLicense) {
+    into ""
+}
