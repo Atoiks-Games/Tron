@@ -18,7 +18,7 @@ public final class Ending extends Scene {
         g.clearGraphics();
         if (img != null) g.drawImage(img, 0, 0);
         g.setColor(Color.white);
-        g.drawString("Game lasted for " + time, 20, 440);
+        g.drawString(time, 300, 392);
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
@@ -22,6 +23,8 @@ public final class Loading extends Scene {
     public static final int RADIUS = 100;
     public static final int WIDTH = 600;
     public static final int HEIGHT = 480;
+
+    private static final String LC_LANG = Locale.getDefault().getLanguage();
 
     private final ExecutorService loader = Executors.newSingleThreadExecutor();
 
@@ -85,7 +88,16 @@ public final class Loading extends Scene {
 
     private void loadResourceAsImage(final String path) {
         try {
-            final InputStream is = this.getClass().getResourceAsStream(path);
+            // Find the locale specific resource
+            InputStream is = this.getClass().getResourceAsStream("/" + LC_LANG + path);
+            if (is == null) {
+                // Find it as if english was its locale name
+                is = this.getClass().getResourceAsStream("/" + Locale.ENGLISH.getLanguage() + path);
+            }
+            if (is == null) {
+                // Find it the old way
+                is = this.getClass().getResourceAsStream(path);
+            }
             if (is != null) {
                 scene.resources().put(path, ImageIO.read(is));
                 return;
